@@ -2,7 +2,11 @@ const express = require('express');
 const http = require('http');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+
+// routers
 const dishRouter = require('./routes/dishRouter');
+const promoRouter = require('./routes/promoRouter');
+const leaderRouter = require('./routes/leaderRouter');
 
 const hostname = 'localhost';
 const port = 3000;
@@ -13,6 +17,8 @@ app.use(morgan('dev')); // http request logger - gives type of request and some 
 app.use(bodyParser.json()); // JSON body-parser module middleware 
 
 app.use('/dishes', dishRouter);
+app.use('/promotions', promoRouter);
+app.use('/leaders', leaderRouter);
 // refactored to ./routes/dishRouter.js 
 // app.all('/dishes', (request, response, next) => {
 //     response.statusCode = 200;
