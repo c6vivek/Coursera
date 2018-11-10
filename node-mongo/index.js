@@ -10,29 +10,36 @@ MongoClient.connect(url, (error, client) => {
     console.log('Connected to Server');
 
     const db = client.db(dbname);
-    const collection = db.collection('dishes');
+    // const collection = db.collection('dishes');
 
-    dbOperations.insertDocument(db, 'dishes', { name: 'Vadonut', description: 'Test' }, (result) => {
-        console.log('Insert Document:\n', result.ops);
+    dbOperations.insertDocument(db, { name: "Vadonut", description: "Test"}, "dishes")
+        .then((result) => {
+            console.log("Insert Document:\n", result.ops);
 
-        dbOperations.findDocuments(db, 'dishes', (docs) => {
-            console.log('Found Documents:\n', docs);
+            return dbOperations.findDocuments(db, "dishes");
+        })
+        .then((docs) => {
+            console.log("Found Documents:\n", docs);
 
-            dbOperations.updateDocument(db, { name: 'Vadonut' }, { description: 'Updated Test' }, 'dishes', (result) => {
-                console.log('Updated Document:\n', result.result);
+            return dbOperations.updateDocument(db, { name: "Vadonut" }, { description: "Updated Test" }, "dishes");
 
-                dbOperations.findDocuments(db, 'dishes', (docs) => {
-                    console.log('Found Updated Documents:\n', docs);
+        })
+        .then((result) => {
+            console.log("Updated Document:\n", result.result);
 
-                    db.dropCollection('dishes', (result) => {
-                        console.log('Dropped Collection: ', result);
+            return dbOperations.findDocuments(db, "dishes");
+        })
+        .then((docs) => {
+            console.log("Found Updated Documents:\n", docs);
+                            
+            return db.dropCollection("dishes");
+        })
+        .then((result) => {
+            console.log("Dropped Collection: ", result);
 
-                        client.close();
-                    });
-                });
-            });
-        });
-    });
+            return client.close();
+        })
+        .catch((err) => console.log(err));
 
     // collection.insertOne({name: 'Testu-PIZZA', description: 'one more'}, (error, result) => {
     //     assert.equal(error, null);
