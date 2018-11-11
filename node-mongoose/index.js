@@ -13,7 +13,21 @@ connection.then((db) => {
     })
     .then((dish) => {
         console.log(dish);
-        return Dishes.find({}).exec();
+        //return Dishes.find({}).exec();
+        return Dishes.findByIdAndUpdate(dish._id, {
+            $set: {
+                description: 'Updated description for test pizza'
+            }
+        }, { new: true}).exec();
+    })
+    .then((dish) => {
+        console.log(dish);
+        dish.comments.push({
+            rating: 4,
+            comment: 'Hell of a good pizza',
+            author: 'Gordon Ramsay'
+        });
+        return dish.save();
     })
     .then((dishes) => {
         console.log(dishes);
