@@ -41,50 +41,68 @@ app.use(session({
   store: new FileStore()
 }));
 
-function auth(request, response, next) {
-  //console.log(request.signedCookies);
-  console.log(request.session);
+// function auth(request, response, next) {
+//   //console.log(request.signedCookies);
+//   console.log(request.session);
 
-  // if (!request.signedCookies.user) {
-  if (!request.session.user) {
-    var authHeader = request.headers.authorization;
-    if (!authHeader) {
-      var error = new Error('You are not Authenticated!');
-      response.setHeader('WWW-Authenticate', 'Basic');
-      error.status = 401;
-      next(error);
-      return;
-    }
-    var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-    var user = auth[0];
-    var pass = auth[1];
-    if (user == 'admin' && pass == 'password') {
-      // response.cookie('user','admin',{signed: true});
-      request.session.user = 'admin';
-      next(); // authorized
-    } else {
-      var error = new Error('You are not authenticated!');
-      response.setHeader('WWW-Authenticate', 'Basic');
-      error.status = 401;
-      next(error);
-    }
-  } else {
-    // if (request.signedCookies.user === 'admin') {
-    if (request.session.user === 'admin') {
+//   // if (!request.signedCookies.user) {
+//   if (!request.session.user) {
+//     var authHeader = request.headers.authorization;
+//     if (!authHeader) {
+//       var error = new Error('You are not Authenticated!');
+//       response.setHeader('WWW-Authenticate', 'Basic');
+//       error.status = 401;
+//       next(error);
+//       return;
+//     }
+//     var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+//     var user = auth[0];
+//     var pass = auth[1];
+//     if (user == 'admin' && pass == 'password') {
+//       // response.cookie('user','admin',{signed: true});
+//       request.session.user = 'admin';
+//       next(); // authorized
+//     } else {
+//       var error = new Error('You are not authenticated!');
+//       response.setHeader('WWW-Authenticate', 'Basic');
+//       error.status = 401;
+//       next(error);
+//     }
+//   } else {
+//     // if (request.signedCookies.user === 'admin') {
+//     if (request.session.user === 'admin') {
+//       next();
+//     } else {
+//       var error = new Error('You are not authenticated!');
+//       error.status = 401;
+//       next(error);
+//     }
+//   }
+// }
+function auth(req, res, next) {
+  console.log(req.session);
+  if (!req.session.user) {
+    var err = new Error('You are not authenticated!');
+    err.status = 403;
+    return next(err);
+  }
+  else {
+    if (req.session.user === 'authenticated') {
       next();
-    } else {
-      var error = new Error('You are not authenticated!');
-      error.status = 401;
-      next(error);
+    }
+    else {
+      var err = new Error('You are not authenticated!');
+      err.status = 403;
+      return next(err);
     }
   }
 }
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
 app.use(auth);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leaderRouter);
