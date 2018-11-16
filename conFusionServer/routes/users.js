@@ -4,10 +4,11 @@ const bodyParser = require('body-parser');
 var passport = require('passport');
 
 const User = require('../models/users');
+var authenticate = require('../authenticate');
 
 router.use(bodyParser.json());
 
-// commented to use passport
+// session authentication
 // router.post('/signup', (req, res, next) => {
 //   User.findOne({ username: req.body.username })
 //     .then((user) => {
@@ -31,6 +32,7 @@ router.use(bodyParser.json());
 //     .catch((err) => next(err));
 // });
 
+// Passport authentication
 router.post('/signup', (req, res, next) => {
   User.register(new User({username: req.body.username}), 
     req.body.password, (err, user) => {
@@ -49,7 +51,7 @@ router.post('/signup', (req, res, next) => {
   });
 });
 
-// commented to use passport
+// session authentication
 // // TODO: update to check in body for username and password as well
 // router.post('/login', (req, res, next) => {
 //   if (!req.session.user) {
@@ -91,12 +93,23 @@ router.post('/signup', (req, res, next) => {
 //   }
 // });
 
+// Passport authentication
+// router.post('/login', passport.authenticate('local'), (req, res) => {
+//   res.statusCode = 200;
+//   res.setHeader('Content-Type', 'application/json');
+//   res.json({success: true, status: 'You are successfully logged in!'});
+// });
+
+// Passport JWT authentication
 router.post('/login', passport.authenticate('local'), (req, res) => {
+  var token = authenticate.getToken({_id: req.user._id});
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
-  res.json({success: true, status: 'You are successfully logged in!'});
+  res.json({success: true, token: token, status: 'You are successfully logged in!'});
 });
 
+
+// TODO: lectures didn't handle logout well, fix it yourself
 router.get('/logout', (req, res) => {
   if (req.session) {
     req.session.destroy();

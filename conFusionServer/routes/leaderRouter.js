@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const Leaders = require('../models/leaders');
+var authenticate = require('../authenticate');
 
 const leaderRouter = express.Router();
 
@@ -18,7 +19,7 @@ leaderRouter.route('/')
             }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .post((request, response, next) => {
+    .post(authenticate.verifyUser, (request, response, next) => {
         Leaders.create(request.body)
             .then((leader) => {
                 console.log('Leader Created ', leader);
@@ -28,11 +29,11 @@ leaderRouter.route('/')
             }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .put((request, response, next) => {
+    .put(authenticate.verifyUser, (request, response, next) => {
         response.statusCode = 403;
         response.end('PUT operation not supported on /leaders');
     })
-    .delete((request, response, next) => {
+    .delete(authenticate.verifyUser, (request, response, next) => {
         Leaders.remove({})
             .then((resp) => {
                 response.statusCode = 200;
@@ -53,11 +54,11 @@ leaderRouter.route('/:leaderId')
             }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .post((request, response, next) => {
+    .post(authenticate.verifyUser, (request, response, next) => {
         response.statusCode = 403;
         response.end('POST operation not supported on /leaders/' + request.params.leaderId);
     })
-    .put((request, response, next) => {
+    .put(authenticate.verifyUser, (request, response, next) => {
         Leaders.findByIdAndUpdate(request.params.leaderId, {
             $set: request.body
         }, { new: true })
@@ -68,7 +69,7 @@ leaderRouter.route('/:leaderId')
             }, (error) => next(error))
             .catch((error) => next(error));
     })
-    .delete((request, response, next) => {
+    .delete(authenticate.verifyUser, (request, response, next) => {
         Leaders.findByIdAndRemove(request.params.leaderId)
             .then((resp) => {
                 response.statusCode = 200;
